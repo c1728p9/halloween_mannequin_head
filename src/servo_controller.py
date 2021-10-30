@@ -35,7 +35,10 @@ class ServoController():
         """Set the angle of the servo"""
         logging.info('Setting angle to {}'.format(angle))
         gpio.output(self.servo_pin, True)
-        self.pwm.ChangeDutyCycle(angle / 18 + 2)
+        # Period 20ms
+        # 0.5ms (2.5% duty cycle) = 0 deg
+        # 2.5ms (12.5% duty cycle) = 180 deg
+        self.pwm.ChangeDutyCycle(angle * 10 / 180 + 2.5)
         time.sleep(1)
         gpio.output(self.servo_pin, False)
         self.pwm.ChangeDutyCycle(0)
