@@ -1,6 +1,7 @@
-import RPi.GPIO as gpio
 import time
 import logging
+from pca9685 import PCA9685
+import time
 
 
 class ServoController():
@@ -8,9 +9,10 @@ class ServoController():
     def __init__(self):
         """Set up the servos"""
         logging.info('Setting up servo')
-        self.servo_pin = 3
-        self._setup_gpio()
         self._set_servo_range()
+        self.pca_controller = PCA9685(1, 0x40, 7)
+        self.pca_controller.set_frequency(50)
+        self.pca_controller.set_sleep(False)
 
     def _set_servo_range(self):
         """Sets the range of the servo"""
@@ -21,27 +23,15 @@ class ServoController():
 
     def __del__(self):
         """Clean up"""
-        self.pwm.stop()
-        gpio.cleanup()
-
-    def _setup_gpio(self):
-        """Set up the gpio"""
-        gpio.setmode(gpio.BOARD)
-        gpio.setup(self.servo_pin, gpio.OUT)
-        self.pwm = gpio.PWM(self.servo_pin, 50)
-        self.pwm.start(0)
+        self.pca_controller.set_sleep(True)
 
     def set_servo_angle(self, angle):
         """Set the angle of the servo"""
         logging.info('Setting angle to {}'.format(angle))
-        gpio.output(self.servo_pin, True)
         # Period 20ms
         # 0.5ms (2.5% duty cycle) = 0 deg
         # 2.5ms (12.5% duty cycle) = 180 deg
-        self.pwm.ChangeDutyCycle(angle * 10 / 180 + 2.5)
-        time.sleep(1)
-        gpio.output(self.servo_pin, False)
-        self.pwm.ChangeDutyCycle(0)
+        self.pca_controller.set_duty(1, (angle * 10 / 180 + 2.5)/100)
 
     def set_servo_percent(self, percent):
         """Converts a decimal percentage into servo angle"""
