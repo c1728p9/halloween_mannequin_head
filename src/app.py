@@ -26,7 +26,7 @@ class HalloweenMannequinHead():
     def _setup_stream(self):
         """Set up the stream to the camera"""
         logging.info('Starting stream')
-        self.stream = Stream(os.environ.get('STREAM_URI', None))
+        self.stream = Stream(None)
 
     def _setup_object_recognition(self):
         """Set up object recognition and load models"""
